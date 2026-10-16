@@ -125,3 +125,5 @@ If the repository is private, they need to be added under **Settings → Collabo
 
 No email-based password reset (the librarian resets passwords), no online payments (payments are recorded
 at the desk), no login lockout, single library branch, English only.
+=======
+ 
