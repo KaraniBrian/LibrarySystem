@@ -1,0 +1,53 @@
+name: Build, test and release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore LibraryManagementSystem.sln
+
+      - name: Build
+        run: dotnet build LibraryManagementSystem.sln --configuration Release --no-restore
+
+      - name: Unit tests
+        run: dotnet test LibraryManagement.Tests/LibraryManagement.Tests.vbproj --configuration Release --no-build
+
+      # The steps below run only when you push a version tag such as v1.0.0
+      - name: Publish self-contained app
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: >
+          dotnet publish LibraryManagementSystem/LibraryManagementSystem.vbproj
+          --configuration Release --runtime win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          --output publish
+
+      - name: Package zip
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          Copy-Item Database publish/Database -Recurse
+          Copy-Item README.md publish/
+          Compress-Archive -Path publish/* -DestinationPath LibraryManagementSystem-win-x64.zip
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: LibraryManagementSystem-win-x64.zip
+          generate_release_notes: true
