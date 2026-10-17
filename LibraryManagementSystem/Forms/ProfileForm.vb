@@ -7,54 +7,15 @@ Imports LibraryManagement.Core
 
 ''' <summary>Screens 3 and 20 - My Profile / Student Profile (one form for both roles).</summary>
 Public Class ProfileForm
-    Inherits PageForm
-
     Private ReadOnly _auth As New AuthService()
-    Private ReadOnly picProfile As New PictureBox() With {.Name = "picProfile", .Size = New Size(140, 140), .SizeMode = PictureBoxSizeMode.Zoom}
-    Private ReadOnly btnUploadPhoto As Button = NewButton("btnUploadPhoto", "Change Photo", ButtonKind.Secondary, 140)
-    Private ReadOnly lblAdmissionNo As Label = NewLabel("lblAdmissionNo", "Admission Number:")
-    Private ReadOnly txtAdmissionNo As TextBox = NewTextBox("txtAdmissionNo", 50, True)
-    Private ReadOnly txtFirstName As TextBox = NewTextBox("txtFirstName", 100, True)
-    Private ReadOnly txtLastName As TextBox = NewTextBox("txtLastName", 100, True)
-    Private ReadOnly txtEmail As TextBox = NewTextBox("txtEmail", 255, True)
-    Private ReadOnly txtPhone As TextBox = NewTextBox("txtPhone", 20, True)
-    Private ReadOnly txtRole As TextBox = NewTextBox("txtRole", 30, True)
-    Private ReadOnly btnEdit As Button = NewButton("btnEdit", "Edit Profile", ButtonKind.Primary, 140)
-    Private ReadOnly btnSave As Button = NewButton("btnSave", "Save Changes", ButtonKind.Primary, 140)
-    Private ReadOnly btnCancel As Button = NewButton("btnCancel", "Cancel", ButtonKind.Secondary, 100)
-    Private ReadOnly btnChangePassword As Button = NewButton("btnChangePassword", "Change Password", ButtonKind.Secondary, 170)
 
     Public Sub New()
-        MyBase.New(If(AppSession.CurrentUser IsNot Nothing AndAlso AppSession.CurrentUser.IsStudent, "Student Profile", "My Profile"))
-        Dim body As New TableLayoutPanel With {.Name = "tblBody", .AutoSize = True, .ColumnCount = 2}
-        body.ColumnStyles.Add(New ColumnStyle(SizeType.AutoSize))
-        body.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100.0F))
+        ' This call is required by the designer.
+        InitializeComponent()
+    End Sub
 
-        Dim photoColumn As New FlowLayoutPanel With {.AutoSize = True, .FlowDirection = FlowDirection.TopDown, .WrapContents = False,
-                                                     .Margin = New Padding(0, 0, 30, 0)}
-        photoColumn.Controls.Add(picProfile)
-        photoColumn.Controls.Add(btnUploadPhoto)
-
-        Dim fields As TableLayoutPanel = NewFieldTable("tblFields", 1)
-        AddField(fields, lblAdmissionNo, txtAdmissionNo)
-        AddField(fields, NewLabel("lblFirstName", "First Name:"), txtFirstName)
-        AddField(fields, NewLabel("lblLastName", "Last Name:"), txtLastName)
-        AddField(fields, NewLabel("lblEmail", "Email:"), txtEmail)
-        AddField(fields, NewLabel("lblPhone", "Phone:"), txtPhone)
-        AddField(fields, NewLabel("lblRole", "Role:"), txtRole)
-        fields.Dock = DockStyle.Top
-        body.Controls.Add(photoColumn)
-        body.Controls.Add(fields)
-
-        AddAutoRow(body)
-        AddAutoRow(NewButtonRow("pnlActions", btnEdit, btnSave, btnCancel, btnChangePassword))
-        AddAutoRow(lblMessage)
-
-        AddHandler btnUploadPhoto.Click, Sub(sender As Object, e As EventArgs) OnUploadPhoto()
-        AddHandler btnEdit.Click, Sub(sender As Object, e As EventArgs) OnEdit()
-        AddHandler btnSave.Click, Sub(sender As Object, e As EventArgs) OnSave()
-        AddHandler btnCancel.Click, Sub(sender As Object, e As EventArgs) OnCancel()
-        AddHandler btnChangePassword.Click, Sub(sender As Object, e As EventArgs) OnChangePassword()
+    Private Sub ProfileForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LoadProfile()
     End Sub
 
     Private Shared Sub SetReadOnly(box As TextBox, isReadOnly As Boolean)
@@ -63,59 +24,60 @@ Public Class ProfileForm
     End Sub
 
     Private Sub SetEditing(editing As Boolean)
-        SetReadOnly(txtFirstName, Not editing)
-        SetReadOnly(txtLastName, Not editing)
-        SetReadOnly(txtPhone, Not editing)
-        btnSave.Enabled = editing
-        btnCancel.Enabled = editing
-        btnEdit.Enabled = Not editing
+        SetReadOnly(TxtFirstName, Not editing)
+        SetReadOnly(TxtLastName, Not editing)
+        SetReadOnly(TxtPhone, Not editing)
+        BtnSave.Enabled = editing
+        BtnCancel.Enabled = editing
+        BtnEdit.Enabled = Not editing
     End Sub
 
-    Protected Overrides Sub LoadData()
+    Private Sub LoadProfile()
         Run(Sub()
                 Dim user As UserAccount = _auth.RefreshCurrentUser()
-                txtFirstName.Text = user.FirstName
-                txtLastName.Text = user.LastName
-                txtEmail.Text = user.Email
-                txtPhone.Text = user.Phone
-                txtRole.Text = user.RoleName
-                txtAdmissionNo.Text = user.AdmissionNo
-                lblAdmissionNo.Visible = user.IsStudent
-                txtAdmissionNo.Visible = user.IsStudent
-                picProfile.Image = If(LoadImageSafe(user.PhotoPath), MakeAvatar(140))
-            End Sub)
+                LblTitle.Text = If(user.IsStudent, "Student Profile", "My Profile")
+                TxtFirstName.Text = user.FirstName
+                TxtLastName.Text = user.LastName
+                TxtEmail.Text = user.Email
+                TxtPhone.Text = user.Phone
+                TxtRole.Text = user.RoleName
+                TxtAdmissionNo.Text = user.AdmissionNo
+                LblAdmissionNo.Visible = user.IsStudent
+                TxtAdmissionNo.Visible = user.IsStudent
+                PicProfile.Image = If(LoadImageSafe(user.PhotoPath), MakeAvatar(140))
+            End Sub, LblMessage)
         SetEditing(False)
     End Sub
 
-    Private Sub OnEdit()
+    Private Sub BtnEdit_Click(sender As Object, e As EventArgs) Handles BtnEdit.Click
         SetEditing(True)
-        ShowMsg("", False)
-        txtFirstName.Focus()
+        ShowMessage(LblMessage, "", False)
+        TxtFirstName.Focus()
     End Sub
 
-    Private Sub OnCancel()
-        LoadData()
-        ShowMsg("", False)
+    Private Sub BtnCancel_Click(sender As Object, e As EventArgs) Handles BtnCancel.Click
+        LoadProfile()
+        ShowMessage(LblMessage, "", False)
     End Sub
 
-    Private Sub OnSave()
-        If Run(Sub() _auth.UpdateProfile(txtFirstName.Text, txtLastName.Text, txtPhone.Text)) Then
-            LoadData()
-            ShowMsg("Profile updated.", False)
+    Private Sub BtnSave_Click(sender As Object, e As EventArgs) Handles BtnSave.Click
+        If Run(Sub() _auth.UpdateProfile(TxtFirstName.Text, TxtLastName.Text, TxtPhone.Text), LblMessage) Then
+            LoadProfile()
+            ShowMessage(LblMessage, "Profile updated.", False)
         End If
     End Sub
 
-    Private Sub OnUploadPhoto()
+    Private Sub BtnUploadPhoto_Click(sender As Object, e As EventArgs) Handles BtnUploadPhoto.Click
         Using dialog As New OpenFileDialog With {.Filter = "Pictures (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg", .Title = "Choose a profile picture"}
             If dialog.ShowDialog(Me) <> DialogResult.OK Then Return
-            If Run(Sub() _auth.SavePhoto(dialog.FileName)) Then
-                LoadData()
-                ShowMsg("Photo updated.", False)
+            If Run(Sub() _auth.SavePhoto(dialog.FileName), LblMessage) Then
+                LoadProfile()
+                ShowMessage(LblMessage, "Photo updated.", False)
             End If
         End Using
     End Sub
 
-    Private Sub OnChangePassword()
+    Private Sub BtnChangePassword_Click(sender As Object, e As EventArgs) Handles BtnChangePassword.Click
         Using dialog As New ChangePasswordForm()
             dialog.ShowDialog(Me)
         End Using

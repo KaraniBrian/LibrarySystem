@@ -22,15 +22,17 @@ Friend Module Program
                 If login.ShowDialog() <> DialogResult.OK Then Exit Do
             End Using
 
-            Dim shell As ShellForm
             If AppSession.CurrentUser.IsLibrarian Then
-                shell = New LibrarianDashboard()
+                Using dashboard As New LibrarianDashboard()
+                    Application.Run(dashboard)
+                    showLogin = dashboard.LoggedOut
+                End Using
             Else
-                shell = New StudentDashboard()
+                Using dashboard As New StudentDashboard()
+                    Application.Run(dashboard)
+                    showLogin = dashboard.LoggedOut
+                End Using
             End If
-            Application.Run(shell)
-            showLogin = shell.LoggedOut
-            shell.Dispose()
         Loop
     End Sub
 

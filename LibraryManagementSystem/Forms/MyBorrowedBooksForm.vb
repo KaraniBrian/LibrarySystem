@@ -7,111 +7,97 @@ Imports LibraryManagement.Core
 
 ''' <summary>Screen 17 - My Borrowed Books (only the logged-in student's loans).</summary>
 Public Class MyBorrowedBooksForm
-    Inherits PageForm
-
     Private ReadOnly _loans As New LoanService()
-    Private ReadOnly txtSearch As TextBox = NewTextBox("txtSearch", 100, False, "Search my borrowed books")
-    Private ReadOnly btnSearch As Button = NewButton("btnSearch", "Search", ButtonKind.Primary, 100)
-    Private ReadOnly cmbStatus As ComboBox = NewCombo("cmbStatus")
-    Private ReadOnly dgvMyBooks As DataGridView = NewGrid("dgvMyBooks")
-    Private ReadOnly txtSelectedBook As TextBox = NewTextBox("txtSelectedBook", 0, True)
-    Private ReadOnly txtDueDate As TextBox = NewTextBox("txtDueDate", 0, True)
-    Private ReadOnly txtStatusValue As TextBox = NewTextBox("txtStatusValue", 0, True)
-    Private ReadOnly btnViewDetails As Button = NewButton("btnViewDetails", "View Details", ButtonKind.Secondary, 140)
-    Private ReadOnly btnRequestReturn As Button = NewButton("btnRequestReturn", "Request Return", ButtonKind.Primary, 160)
-    Private ReadOnly btnRefresh As Button = NewButton("btnRefresh", "Refresh", ButtonKind.Secondary, 100)
     Private _loanId As Integer
     Private _bookId As Integer
     Private _loading As Boolean
 
     Public Sub New()
-        MyBase.New("My Borrowed Books")
-        txtSearch.Width = 300
-        cmbStatus.Width = 170
-        Dim bar As FlowLayoutPanel = NewToolbar("pnlSearchBar")
-        bar.Controls.AddRange(New Control() {txtSearch, btnSearch, NewLabel("lblStatus", "Borrowing Status:"), cmbStatus})
-        AddAutoRow(bar)
-        AddFillRow(dgvMyBooks)
-
-        Dim fields As TableLayoutPanel = NewFieldTable("tblFields", 3)
-        AddField(fields, NewLabel("lblSelectedBook", "Selected Book:"), txtSelectedBook)
-        AddField(fields, NewLabel("lblDueDate", "Due Date:"), txtDueDate)
-        AddField(fields, NewLabel("lblStatusValue", "Status:"), txtStatusValue)
-        AddAutoRow(fields)
-        AddAutoRow(NewButtonRow("pnlActions", btnViewDetails, btnRequestReturn, btnRefresh))
-        AddAutoRow(lblMessage)
-
-        FillCombo(cmbStatus, LoanService.StatusFilters)
-        AddHandler btnSearch.Click, Sub(sender As Object, e As EventArgs) LoadLoans()
-        EnterKeyAction(txtSearch, AddressOf LoadLoans)
-        AddHandler cmbStatus.SelectionChangeCommitted, Sub(sender As Object, e As EventArgs) LoadLoans()
-        AddHandler btnRefresh.Click, Sub(sender As Object, e As EventArgs) LoadLoans()
-        AddHandler dgvMyBooks.SelectionChanged, Sub(sender As Object, e As EventArgs) OnSelectionChanged()
-        AddHandler btnViewDetails.Click, Sub(sender As Object, e As EventArgs) OnViewDetails()
-        AddHandler btnRequestReturn.Click, Sub(sender As Object, e As EventArgs) OnRequestReturn()
+        ' This call is required by the designer.
+        InitializeComponent()
+        StatusColors(DgvMyBooks)
     End Sub
 
-    Protected Overrides Sub LoadData()
+    Private Sub MyBorrowedBooksForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        CmbStatus.SelectedIndex = 0
+        LoadLoans()
+    End Sub
+
+    Private Sub TxtSearch_KeyDown(sender As Object, e As KeyEventArgs) Handles TxtSearch.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            e.SuppressKeyPress = True
+            LoadLoans()
+        End If
+    End Sub
+
+    Private Sub BtnSearch_Click(sender As Object, e As EventArgs) Handles BtnSearch.Click
+        LoadLoans()
+    End Sub
+
+    Private Sub CmbStatus_SelectionChangeCommitted(sender As Object, e As EventArgs) Handles CmbStatus.SelectionChangeCommitted
+        LoadLoans()
+    End Sub
+
+    Private Sub BtnRefresh_Click(sender As Object, e As EventArgs) Handles BtnRefresh.Click
         LoadLoans()
     End Sub
 
     Private Sub LoadLoans()
         Run(Sub()
-                Dim table As DataTable = _loans.GetMyLoans(txtSearch.Text, Convert.ToString(cmbStatus.SelectedItem))
+                Dim table As DataTable = _loans.GetMyLoans(TxtSearch.Text, Convert.ToString(CmbStatus.SelectedItem))
                 _loading = True
                 Try
-                    BindGrid(dgvMyBooks, table, "BookId")
+                    BindGrid(DgvMyBooks, table)
                 Finally
                     _loading = False
                 End Try
-            End Sub)
+            End Sub, LblMessage)
         ClearDetails()
     End Sub
 
     Private Sub ClearDetails()
         _loanId = 0
         _bookId = 0
-        txtSelectedBook.Clear()
-        txtDueDate.Clear()
-        txtStatusValue.Clear()
-        btnViewDetails.Enabled = False
-        btnRequestReturn.Enabled = False
+        TxtSelectedBook.Clear()
+        TxtDueDate.Clear()
+        TxtStatusValue.Clear()
+        BtnViewDetails.Enabled = False
+        BtnRequestReturn.Enabled = False
         _loading = True
         Try
-            dgvMyBooks.ClearSelection()
-            dgvMyBooks.CurrentCell = Nothing
+            ClearGridSelection(DgvMyBooks)
         Finally
             _loading = False
         End Try
     End Sub
 
-    Private Sub OnSelectionChanged()
+    Private Sub DgvMyBooks_SelectionChanged(sender As Object, e As EventArgs) Handles DgvMyBooks.SelectionChanged
         If _loading Then Return
-        Dim row As DataGridViewRow = SelectedRow(dgvMyBooks)
+        Dim row As DataGridViewRow = SelectedRow(DgvMyBooks)
         If row Is Nothing Then Return
         _loanId = CellInt(row, "Loan ID")
         _bookId = CellInt(row, "BookId")
         Dim status As String = CellText(row, "Status")
-        txtSelectedBook.Text = CellText(row, "Book")
-        txtDueDate.Text = CellDate(row, "Due Date").ToString("yyyy-MM-dd")
-        txtStatusValue.Text = status
-        btnViewDetails.Enabled = True
-        btnRequestReturn.Enabled = (status = "Active" OrElse status = "Overdue")
+        TxtSelectedBook.Text = CellText(row, "Book")
+        TxtDueDate.Text = CellDate(row, "Due Date").ToString("yyyy-MM-dd")
+        TxtStatusValue.Text = status
+        BtnViewDetails.Enabled = True
+        BtnRequestReturn.Enabled = (status = "Active" OrElse status = "Overdue")
     End Sub
 
-    Private Sub OnViewDetails()
+    Private Sub BtnViewDetails_Click(sender As Object, e As EventArgs) Handles BtnViewDetails.Click
         If _bookId <= 0 Then Return
         Using dialog As New BookDetailsForm(_bookId)
             dialog.ShowDialog(Me)
         End Using
     End Sub
 
-    Private Sub OnRequestReturn()
+    Private Sub BtnRequestReturn_Click(sender As Object, e As EventArgs) Handles BtnRequestReturn.Click
         If _loanId <= 0 Then Return
-        Using dialog As New StudentReturnForm(_loanId, txtSelectedBook.Text, txtDueDate.Text)
+        Using dialog As New StudentReturnForm(_loanId, TxtSelectedBook.Text, TxtDueDate.Text)
             If dialog.ShowDialog(Me) = DialogResult.OK Then
                 LoadLoans()
-                ShowMsg("Return request sent. Please hand the book to the librarian.", False)
+                ShowMessage(LblMessage, "Return request sent. Please hand the book to the librarian.", False)
             End If
         End Using
     End Sub

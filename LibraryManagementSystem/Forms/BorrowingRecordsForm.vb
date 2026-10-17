@@ -7,76 +7,60 @@ Imports LibraryManagement.Core
 
 ''' <summary>Screen 10 - Borrowing / Returns Records with filters and CSV export.</summary>
 Public Class BorrowingRecordsForm
-    Inherits PageForm
-
     Private ReadOnly _loans As New LoanService()
-    Private ReadOnly lblSearch As Label = NewLabel("lblSearch", "Search:")
-    Private ReadOnly txtSearch As TextBox = NewTextBox("txtSearch", 100, False, "Search student, book or loan ID")
-    Private ReadOnly lblStatus As Label = NewLabel("lblStatus", "Loan Status:")
-    Private ReadOnly cmbStatus As ComboBox = NewCombo("cmbStatus")
-    Private ReadOnly lblFromDate As Label = NewLabel("lblFromDate", "From Date:")
-    Private ReadOnly dtpFromDate As DateTimePicker = NewDate("dtpFromDate")
-    Private ReadOnly lblToDate As Label = NewLabel("lblToDate", "To Date:")
-    Private ReadOnly dtpToDate As DateTimePicker = NewDate("dtpToDate")
-    Private ReadOnly btnFilter As Button = NewButton("btnFilter", "Apply Filters", ButtonKind.Primary, 140)
-    Private ReadOnly btnReset As Button = NewButton("btnReset", "Reset", ButtonKind.Secondary, 100)
-    Private ReadOnly dgvRecords As DataGridView = NewGrid("dgvRecords")
-    Private ReadOnly btnViewDetails As Button = NewButton("btnViewDetails", "View Details", ButtonKind.Secondary, 140)
-    Private ReadOnly btnExport As Button = NewButton("btnExport", "Export Records", ButtonKind.Primary, 150)
-    Private ReadOnly btnRefresh As Button = NewButton("btnRefresh", "Refresh", ButtonKind.Secondary, 100)
-    Private ReadOnly lblRecordCount As Label = NewLabel("lblRecordCount", "Records: 0", True)
     Private _table As DataTable
 
     Public Sub New()
-        MyBase.New("Borrowing and Returns Records")
-        Dim bar As FlowLayoutPanel = NewToolbar("pnlFilters")
-        bar.Controls.AddRange(New Control() {lblSearch, txtSearch, lblStatus, cmbStatus, lblFromDate, dtpFromDate, lblToDate, dtpToDate, btnFilter, btnReset})
-        AddAutoRow(bar)
-        AddFillRow(dgvRecords)
-        AddAutoRow(NewButtonRow("pnlActions", btnViewDetails, btnExport, btnRefresh, lblRecordCount))
-        AddAutoRow(lblMessage)
+        ' This call is required by the designer.
+        InitializeComponent()
+        StatusColors(DgvRecords)
+    End Sub
 
-        txtSearch.Width = 240
-        cmbStatus.Width = 150
-        FillCombo(cmbStatus, LoanService.StatusFilters)
-        AddHandler btnFilter.Click, Sub(sender As Object, e As EventArgs) LoadRecords()
-        EnterKeyAction(txtSearch, AddressOf LoadRecords)
-        AddHandler btnReset.Click, Sub(sender As Object, e As EventArgs) OnReset()
-        AddHandler btnRefresh.Click, Sub(sender As Object, e As EventArgs) LoadRecords()
-        AddHandler btnViewDetails.Click, Sub(sender As Object, e As EventArgs) OnViewDetails()
-        AddHandler btnExport.Click, Sub(sender As Object, e As EventArgs) OnExport()
+    Private Sub BorrowingRecordsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ResetFilters()
-    End Sub
-
-    Private Sub ResetFilters()
-        txtSearch.Clear()
-        cmbStatus.SelectedIndex = 0
-        dtpFromDate.Value = Date.Today.AddYears(-1)
-        dtpToDate.Value = Date.Today
-    End Sub
-
-    Protected Overrides Sub LoadData()
         LoadRecords()
     End Sub
 
-    Private Sub OnReset()
+    Private Sub ResetFilters()
+        TxtSearch.Clear()
+        CmbStatus.SelectedIndex = 0
+        DtpFromDate.Value = Date.Today.AddYears(-1)
+        DtpToDate.Value = Date.Today
+    End Sub
+
+    Private Sub TxtSearch_KeyDown(sender As Object, e As KeyEventArgs) Handles TxtSearch.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            e.SuppressKeyPress = True
+            LoadRecords()
+        End If
+    End Sub
+
+    Private Sub BtnFilter_Click(sender As Object, e As EventArgs) Handles BtnFilter.Click
+        LoadRecords()
+    End Sub
+
+    Private Sub BtnRefresh_Click(sender As Object, e As EventArgs) Handles BtnRefresh.Click
+        LoadRecords()
+    End Sub
+
+    Private Sub BtnReset_Click(sender As Object, e As EventArgs) Handles BtnReset.Click
         ResetFilters()
         LoadRecords()
     End Sub
 
     Private Sub LoadRecords()
         Run(Sub()
-                If dtpFromDate.Value.Date > dtpToDate.Value.Date Then Throw New BusinessRuleException("The 'From' date must not be after the 'To' date.")
-                _table = _loans.GetRecords(txtSearch.Text, Convert.ToString(cmbStatus.SelectedItem), dtpFromDate.Value, dtpToDate.Value)
-                BindGrid(dgvRecords, _table)
-                lblRecordCount.Text = "Records: " & _table.Rows.Count.ToString()
-            End Sub)
+                If DtpFromDate.Value.Date > DtpToDate.Value.Date Then Throw New BusinessRuleException("The 'From' date must not be after the 'To' date.")
+                _table = _loans.GetRecords(TxtSearch.Text, Convert.ToString(CmbStatus.SelectedItem), DtpFromDate.Value, DtpToDate.Value)
+                BindGrid(DgvRecords, _table)
+                LblRecordCount.Text = "Records: " & _table.Rows.Count.ToString()
+            End Sub, LblMessage)
     End Sub
 
-    Private Sub OnViewDetails()
-        Dim row As DataGridViewRow = SelectedRow(dgvRecords)
+    Private Sub BtnViewDetails_Click(sender As Object, e As EventArgs) Handles BtnViewDetails.Click
+        Dim row As DataGridViewRow = SelectedRow(DgvRecords)
         If row Is Nothing Then
-            ShowMsg("Select a record first.", True)
+            ShowMessage(LblMessage, "Select a record first.", True)
             Return
         End If
         Dim returned As String = If(CellText(row, "Return Date") = "", "Not yet returned", CellDate(row, "Return Date").ToString("yyyy-MM-dd"))
@@ -89,14 +73,14 @@ Public Class BorrowingRecordsForm
              "Status: " & CellText(row, "Status"))
     End Sub
 
-    Private Sub OnExport()
+    Private Sub BtnExport_Click(sender As Object, e As EventArgs) Handles BtnExport.Click
         If _table Is Nothing OrElse _table.Rows.Count = 0 Then
-            ShowMsg("There are no records to export.", True)
+            ShowMessage(LblMessage, "There are no records to export.", True)
             Return
         End If
         Using dialog As New SaveFileDialog With {.Filter = "CSV files (*.csv)|*.csv", .FileName = "borrowing_records.csv"}
             If dialog.ShowDialog(Me) <> DialogResult.OK Then Return
-            If Run(Sub() ReportService.ExportCsv(_table, dialog.FileName)) Then ShowMsg("Records exported.", False)
+            If Run(Sub() ReportService.ExportCsv(_table, dialog.FileName), LblMessage) Then ShowMessage(LblMessage, "Records exported.", False)
         End Using
     End Sub
 End Class

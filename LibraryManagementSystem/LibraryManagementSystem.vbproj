@@ -14,6 +14,147 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Update="Forms\BookCatalogueForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BookCatalogueForm.Designer.vb">
+      <DependentUpon>BookCatalogueForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\BookDetailsForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BookDetailsForm.Designer.vb">
+      <DependentUpon>BookDetailsForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\BooksForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BooksForm.Designer.vb">
+      <DependentUpon>BooksForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\BorrowBookForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BorrowBookForm.Designer.vb">
+      <DependentUpon>BorrowBookForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\BorrowingRecordsForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BorrowingRecordsForm.Designer.vb">
+      <DependentUpon>BorrowingRecordsForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\ChangePasswordForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ChangePasswordForm.Designer.vb">
+      <DependentUpon>ChangePasswordForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\FinesManagementForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FinesManagementForm.Designer.vb">
+      <DependentUpon>FinesManagementForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\IssueBookForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\IssueBookForm.Designer.vb">
+      <DependentUpon>IssueBookForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\LibrarianDashboard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LibrarianDashboard.Designer.vb">
+      <DependentUpon>LibrarianDashboard.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\LibrarianHomePage.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LibrarianHomePage.Designer.vb">
+      <DependentUpon>LibrarianHomePage.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\LibrarySettingsForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LibrarySettingsForm.Designer.vb">
+      <DependentUpon>LibrarySettingsForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\LoginForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LoginForm.Designer.vb">
+      <DependentUpon>LoginForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\MyBorrowedBooksForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MyBorrowedBooksForm.Designer.vb">
+      <DependentUpon>MyBorrowedBooksForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\MyFinesForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MyFinesForm.Designer.vb">
+      <DependentUpon>MyFinesForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\PaymentDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PaymentDialog.Designer.vb">
+      <DependentUpon>PaymentDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\PaymentHistoryDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PaymentHistoryDialog.Designer.vb">
+      <DependentUpon>PaymentHistoryDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\ProfileForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ProfileForm.Designer.vb">
+      <DependentUpon>ProfileForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\ReportsForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ReportsForm.Designer.vb">
+      <DependentUpon>ReportsForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\ReturnBookForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ReturnBookForm.Designer.vb">
+      <DependentUpon>ReturnBookForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\StudentDashboard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\StudentDashboard.Designer.vb">
+      <DependentUpon>StudentDashboard.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\StudentHomePage.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\StudentHomePage.Designer.vb">
+      <DependentUpon>StudentHomePage.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\StudentReturnForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\StudentReturnForm.Designer.vb">
+      <DependentUpon>StudentReturnForm.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\StudentsForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\StudentsForm.Designer.vb">
+      <DependentUpon>StudentsForm.vb</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LibraryManagement.Core\LibraryManagement.Core.vbproj" />
   </ItemGroup>
 

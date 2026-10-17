@@ -27,7 +27,7 @@ Friend NotInheritable Class GridPrinter
                                            printer._page = 0
                                        End Sub
             AddHandler doc.PrintPage, AddressOf printer.OnPrintPage
-            Using preview As New PrintPreviewDialog() With {.Document = doc, .Width = 1000, .Height = 700}
+            Using preview As New PrintPreviewDialog() With {.Document = doc, .Width = 1000, .Height = 650}
                 preview.ShowDialog(owner)
             End Using
         End Using
@@ -37,8 +37,8 @@ Friend NotInheritable Class GridPrinter
         Dim g As Graphics = e.Graphics
         Dim bounds As Rectangle = e.MarginBounds
         Dim columns As New List(Of DataGridViewColumn)()
-        For Each col As DataGridViewColumn In _grid.Columns
-            If col.Visible Then columns.Add(col)
+        For Each gridColumn As DataGridViewColumn In _grid.Columns
+            If gridColumn.Visible Then columns.Add(gridColumn)
         Next
         If columns.Count = 0 Then Return
         _page += 1
@@ -65,7 +65,7 @@ Friend NotInheritable Class GridPrinter
                 If y + rowHeight > bounds.Bottom - 20 Then Exit Do
                 Dim row As DataGridViewRow = _grid.Rows(_nextRow)
                 For i As Integer = 0 To columns.Count - 1
-                    Dim text As String = row.Cells(columns(i).Index).FormattedValue.ToString()
+                    Dim text As String = Convert.ToString(row.Cells(columns(i).Index).FormattedValue)
                     g.DrawString(text, bodyFont, Brushes.Black, New RectangleF(bounds.Left + i * colWidth + 2, y + 3, colWidth - 4, rowHeight), format)
                 Next
                 g.DrawLine(Pens.LightGray, bounds.Left, y + rowHeight, bounds.Right, y + rowHeight)

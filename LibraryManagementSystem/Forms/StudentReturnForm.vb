@@ -9,48 +9,30 @@ Imports LibraryManagement.Core
 ''' confirms the physical return on the Process Returns screen.
 ''' </summary>
 Public Class StudentReturnForm
-    Inherits DialogForm
-
     Private ReadOnly _loans As New LoanService()
-    Private ReadOnly _loanId As Integer
-    Private ReadOnly txtBook As TextBox = NewTextBox("txtBook", 0, True)
-    Private ReadOnly txtLoanID As TextBox = NewTextBox("txtLoanID", 0, True)
-    Private ReadOnly txtDueDate As TextBox = NewTextBox("txtDueDate", 0, True)
-    Private ReadOnly dtpReturnDate As DateTimePicker = NewDate("dtpReturnDate")
-    Private ReadOnly cmbCondition As ComboBox = NewCombo("cmbCondition")
-    Private ReadOnly txtNotes As TextBox = NewMultiline("txtNotes", 500, 70)
-    Private ReadOnly btnSubmitRequest As Button = NewButton("btnSubmitRequest", "Submit Return Request", ButtonKind.Primary, 210)
-    Private ReadOnly btnCancel As Button = NewButton("btnCancel", "Cancel", ButtonKind.Secondary, 110)
+    Private _loanId As Integer
 
-    Public Sub New(loanId As Integer, bookTitle As String, dueDate As String)
-        MyBase.New("Request Book Return", 520)
-        _loanId = loanId
-        Dim fields As TableLayoutPanel = NewFieldTable("tblFields", 1)
-        AddField(fields, NewLabel("lblBook", "Book:"), txtBook)
-        AddField(fields, NewLabel("lblLoanID", "Loan ID:"), txtLoanID)
-        AddField(fields, NewLabel("lblDueDate", "Due Date:"), txtDueDate)
-        AddField(fields, NewLabel("lblReturnDate", "Return Date:"), dtpReturnDate)
-        AddField(fields, NewLabel("lblCondition", "Book Condition:"), cmbCondition)
-        AddField(fields, NewLabel("lblNotes", "Additional Notes:"), txtNotes)
-        AddAutoRow(fields)
-        AddAutoRow(NewLabel("lblInfo", "The librarian confirms the return and records the official return date."))
-        AddAutoRow(NewButtonRow("pnlActions", btnSubmitRequest, btnCancel))
-        AddAutoRow(lblMessage)
-
-        txtBook.Text = bookTitle
-        txtLoanID.Text = loanId.ToString()
-        txtDueDate.Text = dueDate
-        dtpReturnDate.Value = Date.Today
-        dtpReturnDate.Enabled = False
-        FillCombo(cmbCondition, {"Good", "Fair", "Damaged"})
-        btnCancel.DialogResult = DialogResult.Cancel
-        CancelButton = btnCancel
-        AddHandler btnSubmitRequest.Click, Sub(sender As Object, e As EventArgs) OnSubmit()
+    Public Sub New()
+        ' This call is required by the designer.
+        InitializeComponent()
     End Sub
 
-    Private Sub OnSubmit()
-        Dim condition As String = Convert.ToString(cmbCondition.SelectedItem)
-        Dim notes As String = txtNotes.Text
-        If Run(Sub() _loans.RequestReturn(_loanId, condition, notes)) Then DialogResult = DialogResult.OK
+    Public Sub New(loanId As Integer, bookTitle As String, dueDate As String)
+        Me.New()
+        _loanId = loanId
+        TxtBook.Text = bookTitle
+        TxtLoanId.Text = loanId.ToString()
+        TxtDueDate.Text = dueDate
+    End Sub
+
+    Private Sub StudentReturnForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        DtpReturnDate.Value = Date.Today
+        CmbCondition.SelectedIndex = 0
+    End Sub
+
+    Private Sub BtnSubmitRequest_Click(sender As Object, e As EventArgs) Handles BtnSubmitRequest.Click
+        Dim condition As String = Convert.ToString(CmbCondition.SelectedItem)
+        Dim notes As String = TxtNotes.Text
+        If Run(Sub() _loans.RequestReturn(_loanId, condition, notes), LblMessage) Then DialogResult = DialogResult.OK
     End Sub
 End Class
